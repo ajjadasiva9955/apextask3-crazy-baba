@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crazy-Baba | Interactive Learning</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet" />
+  <style>
+    html, body {
+      margin: 0; padding: 0; font-family: 'Montserrat', sans-serif;
+      background: linear-gradient(120deg,#e7f0fd,#e0fbfc);
+      color: #222;
+      scroll-behavior: smooth;
+      min-height: 100vh;
+    }
+    /* Navbar */
+    .navbar {
+      position: sticky; top: 0; left: 0; width: 100%; z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center;
+      background-color: #2d6cdf; color: white; padding: 1rem 2rem;
+      box-shadow: 0 2px 12px rgba(44, 62, 80, 0.1);
+    }
+    .navbar .brand {
+      font-weight: 700; font-size: 1.8rem; letter-spacing: 1.5px;
+      cursor: default;
+    }
+    .navbar .brand span {
+      color: #fec632;
+    }
+    nav ul {
+      display: flex; list-style-type: none; margin: 0; padding: 0;
+      gap: 1.5rem;
+    }
+    nav ul li a {
+      text-decoration: none; color: white; font-weight: 500;
+      padding: 0.35rem 0.75rem; border-radius: 6px;
+      transition: background-color 0.3s;
+    }
+    nav ul li a:hover, nav ul li a.active {
+      background-color: #1a4db4;
+    }
+    .menu-toggle {
+      display: none; font-size: 2rem; cursor: pointer;
+      user-select: none;
+    }
+    @media (max-width: 768px) {
+      nav ul {
+        position: fixed; top: 60px; right: 0; height: calc(100% - 60px);
+        width: 220px; background: #2d6cdf; flex-direction: column; transform: translateX(100%);
+        transition: transform 0.3s ease;
+        gap: 1rem; padding: 1rem 0;
+      }
+      nav ul.open {
+        transform: translateX(0);
+      }
+      .menu-toggle {
+        display: block;
+      }
+    }
+
+    /* Section Container */
+    section.container-section {
+      background-color: white;
+      max-width: 850px;
+      margin: 3rem auto;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 6px 16px rgb(44 62 80 / 0.09);
+      animation: fadeSlideIn 0.8s ease forwards;
+      opacity: 0;
+      transform: translateY(32px);
+    }
+    section.container-section.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @keyframes fadeSlideIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    /* Hero */
+    h1.section-title {
+      text-align: center;
+      color: #2d6cdf;
+      font-size: 2.4rem;
+      margin-bottom: 0.25rem;
+      font-weight: 700;
+    }
+    p.section-subtitle {
+      text-align: center;
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 1.75rem;
+    }
+
+    /* ------------------ Quiz Section ------------------ */
+    #quiz-section p.instructions {
+      font-size: 1rem;
+      color: #444;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .quiz-container {
+      max-width: 570px;
+      margin: 0 auto;
+      user-select: none;
+    }
+    .quiz-progress {
+      background: #e4e7ea;
+      border-radius: 12px;
+      height: 10px;
+      overflow: hidden;
+      margin-bottom: 0.8rem;
+    }
+    .quiz-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: #48c9b0;
+      transition: width 0.3s ease;
+    }
+    .timer {
+      color: #de4c4a;
+      font-size: 1rem;
+      font-weight: 600;
+      text-align: right;
+      margin-bottom: 1.05rem;
+      user-select: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .question-text {
+      font-weight: 600;
+      font-size: 1.25rem;
+      color: #2d6cdf;
+      margin-bottom: 1rem;
+      min-height: 70px;
+      user-select: none;
+    }
+    .options-list {
+      list-style-type: none;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.8rem;
+      margin-bottom: 1.4rem;
+    }
+    .option {
+      background: #f1f9f9;
+      border-radius: 8px;
+      padding: 1rem 1.15rem;
+      cursor: pointer;
+      font-size: 1.05rem;
+      transition: background-color 0.3s, color 0.3s;
+      user-select: none;
+      border: 2px solid transparent;
+      color: #222;
+    }
+    .option:hover {
+      background-color: #48c9b0;
+      color: white;
+    }
+    .option.selected {
+      background-color: #2d6cdf;
+      color: white;
+      border-color: #2061ac;
+    }
+    .quiz-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .quiz-button {
+      cursor: pointer;
+      background: #2d6cdf;
+      border: none;
+      padding: 0.72rem 1.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      min-width: 100px;
+    }
+    .quiz-button:disabled {
+      background: #97b4e6;
+      cursor: not-allowed;
+    }
+    .quiz-button:hover:not(:disabled) {
+      background-color: #1a4db4;
+    }
+    .quiz-result {
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: #11b128;
+      margin-top: 1rem;
+      user-select: none;
+    }
+
+    /* ------------------ Image Gallery Section ------------------ */
+    #images-section {
+      text-align: center;
+    }
+    .image-gallery-wrapper {
+      position: relative;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    .image-gallery {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 16px rgb(44 62 80 / 0.09);
+      position: relative;
+      height: 420px;
+      user-select: none;
+    }
+    .gallery-image {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      position: absolute;
+      top: 0; left: 0;
+      transition: opacity 0.6s ease;
+      border-radius: 12px;
+    }
+    .gallery-image.active {
+      opacity: 1;
+      position: relative;
+    }
+    .gallery-controls {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 1.25rem;
+    }
+    .gallery-button {
+      cursor: pointer;
+      background: #2d6cdf;
+      border: none;
+      padding: 0.7rem 1.5rem;
+      font-weight: 700;
+      font-size: 1rem;
+      color: white;
+      border-radius: 8px;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      min-width: 110px;
+    }
+    .gallery-button:hover {
+      background-color: #1a4db4;
+    }
+
+    /* ------------------ Live Joke Section ------------------ */
+    #joke-section {
+      text-align: center;
+    }
+    .joke-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #2d6cdf;
+      margin-bottom: 0.8rem;
+      user-select: none;
+    }
+    .joke-btn {
+      background: #fec632;
+      border: none;
+      color: #333;
+      font-weight: 700;
+      padding: 0.65rem 1.75rem;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      user-select: none;
+      transition: background-color 0.3s ease;
+    }
+    .joke-btn:hover {
+      background: #f9d85c;
+    }
+    .joke-text {
+      margin-top: 1rem;
+      color: #444;
+      min-height: 2.2rem;
+      font-size: 1.05rem;
+      user-select: text;
+    }
+
+    /* ------------------ Contact Section ------------------ */
+    #contact-section {
+      background: #f8fafc;
+      text-align: center;
+      padding: 2rem 1rem;
+      border-radius: 12px;
+      box-shadow: 0 6px 16px rgb(44 62 80 / 0.04);
+      max-width: 700px;
+      margin: 3rem auto 4rem auto;
+      user-select: none;
+    }
+    #contact-section h2 {
+      color: #2d6cdf;
+      font-size: 1.8rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+    .contact-info {
+      font-size: 1.05rem;
+      margin: 0.45rem 0;
+      color: #333;
+    }
+    .contact-info a {
+      color: #2d6cdf;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    .contact-info a:hover {
+      color: #1a4db4;
+      text-decoration: underline;
+    }
+
+    /* Animation */
+    @media (prefers-reduced-motion: no-preference) {
+      section.container-section {
+        opacity: 0;
+        transform: translateY(35px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      section.container-section.visible {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="brand">Crazy-<span>baba</span></div>
+  <div class="menu-toggle">&#9776;</div>
+  <ul>
+    <li><a href="#hero" class="active">Home</a></li>
+    <li><a href="#quiz-section">Quiz</a></li>
+    <li><a href="#images-section">Images</a></li>
+    <li><a href="#joke-section">Live Joke</a></li>
+    <li><a href="#contact-section">Contact</a></li>
+  </ul>
+</nav>
+
+<section class="container-section" id="hero">
+  <h1 class="section-title">Welcome to Crazy-Baba</h1>
+  <p class="section-subtitle">Empowering your learning journey with interactive quizzes, lively galleries and fun jokes.</p>
+</section>
+
+<!-- QUIZ SECTION -->
+<section class="container-section" id="quiz-section">
+  <h2 class="section-title">Quiz Section</h2>
+  <p class="instructions">Start your quiz to check your knowledge!</p>
+  <div class="quiz-container" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+    <div class="quiz-progress" aria-hidden="true">
+      <div class="quiz-progress-bar"></div>
+    </div>
+    <div class="timer" aria-live="polite" aria-atomic="true" aria-relevant="text">Time Left: <span id="timer">20</span>s</div>
+    <div class="question-text" id="questionText" tabindex="0">Press Start to begin the quiz</div>
+    <ul class="options-list" id="optionsList" role="list"></ul>
+    <div class="quiz-buttons">
+      <button id="startBtn" class="quiz-button">Start</button>
+      <button id="previousBtn" class="quiz-button" disabled>Previous</button>
+      <button id="nextBtn" class="quiz-button" disabled>Next</button>
+      <button id="submitBtn" class="quiz-button" disabled>Submit</button>
+      <button id="restartBtn" class="quiz-button" style="display:none;">Restart</button>
+    </div>
+    <p class="quiz-result" id="quizResult" aria-live="polite"></p>
+  </div>
+</section>
+
+<!-- IMAGES SECTION -->
+<section class="container-section" id="images-section">
+  <h2 class="section-title">Image Collection</h2>
+  <p class="section-subtitle">Navigate through our curated images.</p>
+  <div class="image-gallery-wrapper">
+    <div class="image-gallery" aria-live="polite" aria-atomic="true" aria-relevant="additions">
+      <!-- images loaded by JS -->
+    </div>
+    <div class="gallery-controls">
+      <button id="galleryPrevBtn" class="gallery-button" aria-label="Previous Image">&larr; Previous</button>
+      <button id="galleryNextBtn" class="gallery-button" aria-label="Next Image">Next &rarr;</button>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE JOKE SECTION -->
+<section class="container-section" id="joke-section">
+  <h2 class="section-title">Live Joke Section</h2>
+  <p class="section-subtitle">Get a random joke and brighten your day!</p>
+  <button class="joke-btn" id="fetchJokeBtn" aria-live="polite">Tell me a joke!</button>
+  <p class="joke-text" id="jokeDisplay" aria-live="polite" aria-atomic="true">Press the button above for a joke!</p>
+</section>
+
+<!-- CONTACT SECTION -->
+<section class="container-section" id="contact-section">
+  <h2 class="section-title">Contact Us</h2>
+  <p class="contact-info">Phone: <a href="tel:9390144782">9390144782</a></p>
+  <p class="contact-info">Gmail: <a href="mailto:ajjadasiva9955@gmail.com">ajjadasiva9955@gmail.com</a></p>
+  <p class="contact-info">LinkedIn: <a href="https://www.linkedin.com/in/sivasankarajjada/" target="_blank" rel="noopener noreferrer">/sivasankarajjada</a></p>
+</section>
+
+<script>
+  // Navbar toggle for mobile
+  const menuToggle = document.querySelector('.menu-toggle');
+  const navMenu = document.querySelector('nav ul');
+  menuToggle.addEventListener('click', () => navMenu.classList.toggle('open'));
+
+  // Navbar link active switching on scroll
+  const navLinks = document.querySelectorAll('nav a');
+  const sections = ['hero', 'quiz-section', 'images-section', 'joke-section', 'contact-section'];
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(id => {
+      const section = document.getElementById(id);
+      if (section.offsetTop <= window.scrollY + 120) current = id;
+    });
+    navLinks.forEach(link => { link.classList.remove('active'); });
+    const activeLink = document.querySelector(`nav a[href="#${current}"]`);
+    if (activeLink) activeLink.classList.add('active');
+  });
+
+  // Animate sections on scroll
+  const allSections = document.querySelectorAll('section.container-section');
+  function showSectionsOnScroll() {
+    let scrollBottom = window.innerHeight + window.scrollY;
+    allSections.forEach(section => {
+      if (scrollBottom > section.offsetTop + 100) {
+        section.classList.add('visible');
+      }
+    });
+  }
+  window.addEventListener('scroll', showSectionsOnScroll);
+  window.addEventListener('load', showSectionsOnScroll);
+
+  // -------------- QUIZ --------------
+  const quizData = [
+    {question: "Capital of France?", options: ["Berlin", "Paris", "Rome", "London"], answer: "Paris"},
+    {question: "2 + 2 * 3?", options: ["8", "12", "6", "7"], answer: "8"},
+    {question: "Largest mammal?", options: ["Elephant", "Blue Whale", "Big Whale", "Tiger"], answer: "Blue Whale"},
+    {question: "HTML stands for?", options: ["HighText Machine Language", "HyperText Markup Language", "HyperText Maker Language", "None"], answer: "HyperText Markup Language"},
+    {question: "Which is not a programming language?", options: ["Python", "JavaScript", "Microsoft", "Java"], answer: "Microsoft"}
+  ];
+  let currentQuestionIndex = null;
+  let selectedAnswers = [];
+  const questionText = document.getElementById('questionText');
+  const optionsList = document.getElementById('optionsList');
+  const startBtn = document.getElementById('startBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const previousBtn = document.getElementById('previousBtn');
+  const submitBtn = document.getElementById('submitBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const quizResult = document.getElementById('quizResult');
+  const quizProgressBar = document.querySelector('.quiz-progress-bar');
+  const timerEl = document.getElementById('timer');
+  const timerContainer = document.querySelector('.timer');
+
+  let timerInterval = null;
+  let timeLeft = 20;
+  // Initialize quiz interface
+  function resetQuizUI() {
+    selectedAnswers = new Array(quizData.length);
+    currentQuestionIndex = 0;
+    quizResult.textContent = '';
+    quizResult.style.display = 'none';
+    startBtn.style.display = 'none';
+    nextBtn.disabled = false;
+    previousBtn.disabled = true;
+    submitBtn.disabled = true;
+    restartBtn.style.display = 'none';
+    optionsList.innerHTML = '';
+    questionText.textContent = '';
+    quizProgressBar.style.width = '0%';
+    timerContainer.style.display = 'block';
+    timeLeft = 20;
+  }
+  // Set timer countdown
+  function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 20;
+    timerEl.textContent = timeLeft;
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      timerEl.textContent = timeLeft;
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        nextQuestion();
+      }
+    }, 1000);
+  }
+  // Render question and options
+  function showQuestion(index) {
+    const {question, options} = quizData[index];
+    questionText.textContent = question;
+    optionsList.innerHTML = '';
+    options.forEach((opt, i) => {
+      const li = document.createElement('li');
+      li.classList.add('option');
+      li.tabIndex = 0;
+      li.textContent = opt;
+      li.setAttribute('role', 'button');
+      if (selectedAnswers[index] === opt) li.classList.add('selected');
+      li.addEventListener('click', () => selectAnswer(index, opt));
+      li.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectAnswer(index,opt);} });
+      optionsList.appendChild(li);
+    });
+    quizProgressBar.style.width = `${(index / quizData.length) * 100}%`;
+    previousBtn.disabled = (index === 0);
+    nextBtn.disabled = (index === quizData.length - 1);
+    submitBtn.disabled = !(index === quizData.length - 1);
+    startTimer();
+  }
+  // Select answer handler
+  function selectAnswer(qIndex, answer) {
+    selectedAnswers[qIndex] = answer;
+    // Highlight selection
+    [...optionsList.children].forEach(li => {
+      li.classList.toggle('selected', li.textContent === answer);
+    });
+  }
+  // Next question handler
+  function nextQuestion() {
+    if (currentQuestionIndex < quizData.length - 1) {
+      currentQuestionIndex++;
+      showQuestion(currentQuestionIndex);
+    }
+  }
+  // Previous question handler
+  function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+      currentQuestionIndex--;
+      showQuestion(currentQuestionIndex);
+    }
+  }
+  // Submit quiz and show results
+  function submitQuiz() {
+    clearInterval(timerInterval);
+    let correctCount = 0;
+    for (let i = 0; i < quizData.length; i++) {
+      if (selectedAnswers[i] === quizData[i].answer) {
+        correctCount++;
+      }
+    }
+    quizResult.style.display = 'block';
+    quizResult.textContent = `Your score: ${correctCount} / ${quizData.length}`;
+    restartBtn.style.display = 'inline-block';
+    nextBtn.disabled = true;
+    previousBtn.disabled = true;
+    submitBtn.disabled = true;
+    timerContainer.style.display = 'none';
+    questionText.textContent = 'Quiz Completed!';
+    optionsList.innerHTML = '';
+    quizProgressBar.style.width = '100%';
+  }
+  // Restart quiz handler
+  function restartQuiz() {
+    resetQuizUI();
+    showQuestion(currentQuestionIndex);
+  }
+  startBtn.onclick = () => {
+    resetQuizUI();
+    showQuestion(currentQuestionIndex);
+  };
+  nextBtn.onclick = () => {
+    clearInterval(timerInterval);
+    nextQuestion();
+  };
+  previousBtn.onclick = () => {
+    clearInterval(timerInterval);
+    previousQuestion();
+  };
+  submitBtn.onclick = () => submitQuiz();
+  restartBtn.onclick = () => restartQuiz();
+
+  // ------------- Image Gallery --------------
+  const images = [
+    {url: "https://images.unsplash.com/photo-1465101046530-73398c7f28ca", alt: "Mountain"},
+    {url: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308", alt: "City"},
+    {url: "https://images.unsplash.com/photo-1506744038136-46273834b3fb", alt: "Nature"},
+    {url: "https://images.unsplash.com/photo-1432888498266-38ffec3eaf0a", alt: "Forest"},
+    {url: "https://images.unsplash.com/photo-1470770841072-f978cf4d019e", alt: "Valley"},
+    {url: "https://images.unsplash.com/photo-1517816743773-6e0fd518b4a6", alt: "Beach"},
+    {url: "https://images.unsplash.com/photo-1482062364825-616fd23b8fc1", alt: "Field"}
+  ];
+  let currentImgIndex = 0;
+  const imageGallery = document.querySelector('.image-gallery');
+
+  function renderGalleryImage(index) {
+    imageGallery.innerHTML = '';
+    const img = document.createElement('img');
+    img.src = images[index].url;
+    img.alt = images[index].alt;
+    img.className = 'gallery-image active';
+    imageGallery.appendChild(img);
+  }
+  renderGalleryImage(currentImgIndex);
+
+  document.getElementById('galleryNextBtn').onclick = () => {
+    currentImgIndex = (currentImgIndex + 1) % images.length;
+    renderGalleryImage(currentImgIndex);
+  };
+  document.getElementById('galleryPrevBtn').onclick = () => {
+    currentImgIndex = (currentImgIndex - 1 + images.length) % images.length;
+    renderGalleryImage(currentImgIndex);
+  };
+
+  // ------------- Live Joke Section --------------
+  const fetchJokeBtn = document.getElementById('fetchJokeBtn');
+  const jokeDisplay = document.getElementById('jokeDisplay');
+
+  fetchJokeBtn.addEventListener('click', async () => {
+    jokeDisplay.textContent = 'Loading joke...';
+    try {
+      const response = await fetch('https://official-joke-api.appspot.com/random_joke');
+      const data = await response.json();
+      jokeDisplay.textContent = `${data.setup} — ${data.punchline}`;
+    } catch (error) {
+      jokeDisplay.textContent = 'Sorry, could not fetch a joke at this time.';
+    }
+  });
+
+</script>
+</body>
+</html>
